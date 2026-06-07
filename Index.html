@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Talking Tom Retro - GitHub Edition</title>
+    <style>
+        body {
+            background-color: #222222;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 5px;
+            user-select: none;
+        }
+        #phone-container {
+            width: 240px;
+            height: 340px;
+            background-color: #111111;
+            margin: 0 auto;
+            border: 4px solid #444444;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #stats-bar {
+            background-color: #333333;
+            height: 45px;
+            font-size: 11px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-bottom: 2px solid #555555;
+        }
+        .stat-box { text-align: center; font-weight: bold; }
+        .stat-val { color: #00ff00; }
+
+        .room {
+            width: 240px;
+            height: 250px;
+            position: relative;
+            display: none;
+        }
+        #main-room { background: linear-gradient(#4a90e2, #2c3e50); display: block; }
+        #kitchen { background: linear-gradient(#f39c12, #d35400); }
+        #bathroom { background: linear-gradient(#1abc9c, #16a085); }
+        #minigame-menu { background: linear-gradient(#9b59b6, #8e44ad); }
+
+        .tom-sprite {
+            position: absolute;
+            left: 80px;
+            top: 60px;
+            width: 80px; 
+            height: auto;
+        }
+
+        .btn {
+            background-color: #e74c3c;
+            color: white;
+            border: 1px solid #c0392b;
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .nav-bar {
+            position: absolute;
+            bottom: 5px;
+            width: 240px;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .game-screen {
+            width: 240px;
+            height: 210px;
+            background-color: #000;
+            position: relative;
+            overflow: hidden;
+            display: none;
+        }
+        .game-controls {
+            height: 40px;
+            background-color: #222;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        /* --- CAR GAME ASSETS --- */
+        #car-player { 
+            position: absolute; 
+            width: 25px; 
+            height: 40px; 
+            background-image: url('car.jpg'); 
+            background-size: contain;
+            background-repeat: no-repeat;
+            bottom: 10px; 
+        }
+        #car-obstacle { 
+            position: absolute; 
+            width: 25px; 
+            height: 30px; 
+            background-image: url('anX.jpg'); 
+            background-size: contain;
+            background-repeat: no-repeat;
+            top: -40px; 
+        }
+        
+        /* --- FLAPPY GAME ASSETS --- */
+        #flappy-player { position: absolute; width: 20px; height: 20px; background-image: url('tom.jpg'); background-size: cover; left: 40px; border-radius: 50%; }
+        #flappy-pipe { position: absolute; width: 25px; background: #2ecc71; right: -30px; }
+
+        /* --- BRICK/PONG GAME ASSETS --- */
+        #pong-paddle { 
+            position: absolute; 
+            width: 60px; 
+            height: 12px; 
+            background-image: url('partfortheball.jpg'); 
+            background-size: 100% 100%;
+            bottom: 10px; 
+            left: 90px; 
+        }
+        #pong-ball { 
+            position: absolute; 
+            width: 12px; 
+            height: 12px; 
+            background-image: url('ball.jpg'); 
+            background-size: contain;
+            border-radius: 50%; 
+        }
+        .brick {
+            position: absolute;
+            width: 34px;
+            height: 15px;
+            background-image: url('blocks.jpg');
+            background-size: 100% 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="phone-container">
+        
+        <div id="stats-bar">
+            <div class="stat-box">Kitchen<br><span id="s-kitchen" class="stat-val">0%</span></div>
+            <div class="stat-box">Bath<br><span id="s-bath" class="stat-val">0%</span></div>
+            <div class="stat-box">Room<br><span id="s-room" class="stat-val">0%</span></div>
+        </div>
+
+        <div id="main-room" class="room">
+            <img src="tom.jpg" class="tom-sprite" alt="Tom">
+            <div style="position:absolute; top:160px; width:100%; font-size:12px; font-weight:bold; color:yellow;">MAIN LIVING ROOM</div>
+            <div class="nav-bar">
+                <button class="btn" onclick="switchRoom('kitchen')">Go Kitchen</button>
+                <button class="btn" onclick="switchRoom('bathroom')">Go Bath</button>
+                <button class="btn" onclick="switchRoom('minigame-menu')">Games</button>
+            </div>
+        </div>
+
+        <div id="kitchen" class="room">
+            <img src="tom.jpg" class="tom-sprite" alt="Tom">
+            <img src="food.jpg" id="food-item" style="position:absolute; top:20px; left:100px; width:40px; display:block;" alt="Food">
+            <div class="nav-bar">
+                <button class="btn" style="background-color:#2ecc71;" onclick="feedTom()">FEED TOM</button>
+                <button class="btn" onclick="switchRoom('main')">Back</button>
+            </div>
+        </div>
+
+        <div id="bathroom" class="room">
+            <img src="tom.jpg" class="tom-sprite" alt="Tom">
+            <img src="shower.jpg" id="shower-item" style="position:absolute; top:10px; left:100px; width:50px; display:none;" alt="Shower">
+            <div class="nav-bar">
+                <button class="btn" style="background-color:#3498db;" onclick="bathTom()">GIVE BATH</button>
+                <button class="btn" onclick="switchRoom('main')">Back</button>
+            </div>
+        </div>
+
+        <div id="minigame-menu" class="room">
+            <h4 style="margin:5px 0;">SELECT MINI-GAME</h4>
+            <button class="btn" style="width:80%; margin:4px auto; display:block;" onclick="startGame('car')">Car Subway Dodge</button>
+            <button class="btn" style="width:80%; margin:4px auto; display:block;" onclick="startGame('flappy')">Flappy Tom</button>
+            <button class="btn" style="width:80%; margin:4px auto; display:block;" onclick="startGame('pong')">Brick Breaker</button>
+            <div class="nav-bar">
+                <button class="btn" onclick="switchRoom('main')" style="width:90%;">Back To Living Room</button>
+            </div>
+        </div>
+
+        <div id="game-car" class="room" style="background:#222;">
+            <div id="scr-car" class="game-screen">
+                <div style="position:absolute; left:40px; width:2px; height:100%; background:#444;"></div>
+                <div style="position:absolute; left:120px; width:2px; height:100%; background:#444;"></div>
+                <div style="position:absolute; left:200px; width:2px; height:100%; background:#444;"></div>
+                <div id="car-player"></div> 
+                <div id="car-obstacle"></div> 
+            </div>
+            <div class="game-controls">
+                <button class="btn" onclick="moveCar(-1)">Left</button>
+                <button class="btn" style="background:#95a5a6;" onclick="exitGame()">Exit</button>
+                <button class="btn" onclick="moveCar(1)">Right</button>
+            </div>
+        </div>
+
+        <div id="game-flappy" class="room" style="background:#222;">
+            <div id="scr-flappy" class="game-screen" style="background:#70c5ce;" onclick="flapTom()">
+                <div id="flappy-player"></div> 
+                <div id="flappy-pipe" style="top:0; height:60px;"></div>
+                <div id="flappy-pipe-bot" style="position:absolute; width:25px; background:#2ecc71; right:-30px; bottom:0; height:70px;"></div>
+                <div style="position:absolute; top:2px; left:5px; font-size:10px; color:black;">TAP SCREEN TO FLAP</div>
+            </div>
+            <div class="game-controls">
+                <button class="btn" style="width:90%; background:#95a5a6;" onclick="exitGame()">Exit Game</button>
+            </div>
+        </div>
+
+        <div id="game-pong" class="room" style="background:#222;">
+            <div id="scr-pong" class="game-screen">
+                <div id="brick-container"></div> 
+                <div id="pong-paddle"></div> 
+                <div id="pong-ball"></div> 
+            </div>
+            <div class="game-controls">
+                <button class="btn" onclick="movePaddle(-20)">Left</button>
+                <button class="btn" style="background:#95a5a6;" onclick="exitGame()">Exit</button>
+                <button class="btn" onclick="movePaddle(20)">Right</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+        var statKitchen = 40;
+        var statBath = 40;
+        var statRoom = 20;
+
+        var gameInterval;
+        var activeGame = "";
+
+        function updateStatsUI() {
+            document.getElementById("s-kitchen").innerText = statKitchen + "%";
+            document.getElementById("s-bath").innerText = statBath + "%";
+            document.getElementById("s-room").innerText = statRoom + "%";
+        }
+
+        function switchRoom(roomName) {
+            var rooms = document.getElementsByClassName("room");
+            for (var i = 0; i < rooms.length; i++) { rooms[i].style.display = "none"; }
+            
+            if(roomName === 'main') document.getElementById("main-room").style.display = "block";
+            if(roomName === 'kitchen') document.getElementById("kitchen").style.display = "block";
+            if(roomName === 'bathroom') document.getElementById("bathroom").style.display = "block";
+            if(roomName === 'minigame-menu') document.getElementById("minigame-menu").style.display = "block";
+        }
+
+        function feedTom() {
+            if(statKitchen < 100) {
+                statKitchen = Math.min(statKitchen + 20, 100);
+                updateStatsUI();
+                var f = document.getElementById("food-item");
+                f.style.top = "70px"; 
+                setTimeout(function(){ f.style.top = "20px"; }, 300);
+            }
+        }
+
+        function bathTom() {
+            if(statBath < 100) {
+                statBath = Math.min(statBath + 20, 100);
+                updateStatsUI();
+                var s = document.getElementById("shower-item");
+                s.style.display = "block"; 
+                setTimeout(function(){ s.style.display = "none"; }, 500); 
+            }
+        }
+
+        function startGame(gameType) {
+            switchRoom('none'); 
+            activeGame = gameType;
+            clearInterval(gameInterval);
+
+            statKitchen = Math.max(statKitchen - 10, 0);
+            statBath = Math.max(statBath - 10, 0);
+            updateStatsUI();
+
+            if(gameType === 'car') {
+                document.getElementById("game-car").style.display = "block";
+                setupCarGame();
+            } else if(gameType === 'flappy') {
+                document.getElementById("game-flappy").style.display = "block";
+                setupFlappyGame();
+            } else if(gameType === 'pong') {
+                document.getElementById("game-pong").style.display = "block";
+                setupPongGame();
+            }
+        }
+
+        document.getElementById("scr-flappy").addEventListener("touchstart", function(e) {
+            if(activeGame === 'flappy') flapTom();
+        });
+
+        function exitGame() {
+            clearInterval(gameInterval);
+            activeGame = "";
+            switchRoom('minigame-menu');
+        }
+
+        function awardRoomPoints() {
+            statRoom = Math.min(statRoom + 15, 100);
+            updateStatsUI();
+        }
+
+        // --- CAR GAME LOGIC ---
+        var carLane = 1;
+        var carObstacleLane = 0;
+        var carObstacleY = -30;
+        function setupCarGame() {
+            carLane = 1;
+            carObstacleY = -30;
+            carObstacleLane = Math.floor(Math.random() * 3);
+            updateCarPosition();
+            gameInterval = setInterval(updateCarGame, 40);
+        }
+        function moveCar(dir) {
+            carLane = Math.max(0, Math.min(2, carLane + dir));
+            updateCarPosition();
+        }
+        function updateCarPosition() {
+            var lanesX = [20, 100, 180];
+            document.getElementById("car-player").style.left = lanesX[carLane] + "px";
+        }
+        function updateCarGame() {
+            carObstacleY += 6;
+            var lanesX = [20, 100, 180];
+            var obs = document.getElementById("car-obstacle");
+            obs.style.left = lanesX[carObstacleLane] + "px";
+            obs.style.top = carObstacleY + "px";
+
+            if(carObstacleY > 210) {
+                carObstacleY = -30;
+                carObstacleLane = Math.floor(Math.random() * 3);
+                awardRoomPoints(); 
+            }
+            if(carObstacleY > 140 && carObstacleY < 190 && carLane === carObstacleLane) {
+                alert("Crashed!");
+                exitGame();
+            }
+        }
+
+        // --- FLAPPY GAME LOGIC ---
+        var flapY = 100;
+        var flapVY = 0;
+        var pipeX = 240;
+        function setupFlappyGame() {
+            flapY = 100;
+            flapVY = 0;
+            pipeX = 240;
+            gameInterval = setInterval(updateFlappyGame, 50);
+        }
+        function flapTom() {
+            flapVY = -6;
+        }
+        function updateFlappyGame() {
+            flapVY += 0.6; 
+            flapY += flapVY;
+            
+            var pEl = document.getElementById("flappy-player");
+            pEl.style.top = flapY + "px";
+
+            pipeX -= 5;
+            var topPipe = document.getElementById("flappy-pipe");
+            var botPipe = document.getElementById("flappy-pipe-bot");
+            topPipe.style.right = (240 - pipeX) + "px";
+            botPipe.style.right = (240 - pipeX) + "px";
+
+            if(pipeX < -30) {
+                pipeX = 240;
+                awardRoomPoints();
+            }
+
+            if(flapY > 195 || flapY < 0) {
+                alert("Flapped Out!");
+                exitGame();
+            }
+            if(pipeX > 30 && pipeX < 60) {
+                if(flapY < 60 || flapY > 120) {
+                    alert("Hit Pipe!");
+                    exitGame();
+                }
+            }
+        }
+
+        // --- BRICK BREAKER GAME LOGIC ---
+        var paddleX = 90;
+        var ballX = 110, ballY = 100;
+        var ballDX = 3, ballDY = -3;
+        var bricks = [];
+
+        function setupPongGame() {
+            paddleX = 90; ballX = 110; ballY = 120;
+            ballDX = 3; ballDY = -3;
+            document.getElementById("pong-paddle").style.left = paddleX + "px";
+            
+            var container = document.getElementById("brick-container");
+            container.innerHTML = "";
+            bricks = [];
+            
+            for (var r = 0; r < 3; r++) {
+                for (var c = 0; c < 6; c++) {
+                    var bx = 5 + (c * 39);
+                    var by = 15 + (r * 22);
+                    
+                    var bDiv = document.createElement("div");
+                    bDiv.className = "brick";
+                    bDiv.style.left = bx + "px";
+                    bDiv.style.top = by + "px";
+                    bDiv.id = "brick-" + bricks.length;
+                    container.appendChild(bDiv);
+                    
+                    bricks.push({ x: bx, y: by, active: true, id: "brick-" + bricks.length });
+                }
+            }
+            gameInterval = setInterval(updatePongGame, 45);
+        }
+
+        function movePaddle(amt) {
+            paddleX = Math.max(0, Math.min(180, paddleX + amt));
+            document.getElementById("pong-paddle").style.left = paddleX + "px";
+        }
+
+        function updatePongGame() {
+            ballX += ballDX;
+            ballY += ballDY;
+
+            if(ballX <= 0 || ballX >= 228) ballDX = -ballDX;
+            if(ballY <= 0) ballDY = -ballDY;
+
+            if(ballY >= 185 && ballY <= 195) {
+                if(ballX >= paddleX && ballX <= (paddleX + 60)) {
+                    ballDY = -Math.abs(ballDY); 
+                }
+            }
+
+            for(var i=0; i<bricks.length; i++) {
+                var b = bricks[i];
+                if(b.active) {
+                    if(ballX >= b.x && ballX <= b.x + 34 && ballY >= b.y && ballY <= b.y + 15) {
+                        b.active = false;
+                        document.getElementById(b.id).style.display = "none";
+                        ballDY = -ballDY;
+                        awardRoomPoints(); 
+                        break;
+                    }
+                }
+            }
+
+            if(ballY > 210) {
+                alert("Missed the Ball!");
+                exitGame();
+            }
+
+            var bEl = document.getElementById("pong-ball");
+            bEl.style.left = ballX + "px";
+            bEl.style.top = ballY + "px";
+        }
+
+        updateStatsUI();
+    </script>
+</body>
+</html>
